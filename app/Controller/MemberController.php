@@ -24,13 +24,14 @@ class MemberController extends AbstractController
         $user = $this->container->get('user');
 
 
-        if(in_array('consultar_squad', unserialize($user->permissions)) === false ) {
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
+        if (in_array('consultar_squad', $permissions) === false) {
             return $this->response->json([
                 'error' => 'Você não tem permissão para visualizar os membros dessa squad.'
-                ],403
-            );
+            ], 403);
         }
+
 
         $members = MemberModel::where(['squad_uuid' => $uuid])->get();
 
@@ -42,13 +43,13 @@ class MemberController extends AbstractController
     {
         $user = $this->container->get('user');
 
+        // Verificar se permissions é string antes de usar unserialize
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
-        if(in_array('cadastrar_squad', unserialize($user->permmissions)) === false ) {
-
+        if (in_array('cadastrar_squad', $permissions) === false) {
             return $this->response->json([
-                    'error' => 'Você não tem permissão para criar membros nessa squad.'
-                ],403
-            );
+                'error' => 'Você não tem permissão para criar membros nessa squad.'
+            ], 403);
         }
 
         $data = $this->request->getParsedBody();
@@ -60,19 +61,24 @@ class MemberController extends AbstractController
         return $this->response->json([
             'message' => 'Member created successfully!',
             'member' => $member,
-        ],200);
+        ], 200);
     }
+
 
     public function update($uuid, $memberUuid): Psr7ResponseInterface
     {
         $user = $this->container->get('user');
 
 
-        if(in_array('alterar_squad', unserialize($user->permissions)) === false ) {
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
-            return $this->response->json([
-                'error' => 'Você não tem permissão para alterar os membros dessa squad.'
-                ],403
+        if (in_array('alterar_squad', $permissions) === false) {
+
+            return $this->response->json(
+                [
+                    'error' => 'Você não tem permissão para alterar os membros dessa squad.'
+                ],
+                403
             );
         }
 
@@ -90,22 +96,21 @@ class MemberController extends AbstractController
         return $this->response->json([
             'message' => 'Member updated successfully!',
             'member' => $member,
-        ],200);
+        ], 200);
     }
 
     public function delete($uuid, $memberUuid): Psr7ResponseInterface
     {
-         $user = $this->container->get('user');
+        $user = $this->container->get('user');
 
+        // Verificar se permissions é string antes de usar unserialize
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
-        if(in_array('alterar_squad', unserialize($user->permissions)) === false ) {
-
+        if (in_array('alterar_squad', $permissions) === false) {
             return $this->response->json([
                 'error' => 'Você não tem permissão para deletar os membros dessa squad.'
-                ],403
-            );
+            ], 403);
         }
-
 
         $member = MemberModel::where(['uuid' => $memberUuid])->first();
 
@@ -116,5 +121,26 @@ class MemberController extends AbstractController
         $member->delete();
 
         return $this->response->json(['message' => 'Member deleted successfully!']);
+    }
+
+    public function show($uuid, $memberUuid): Psr7ResponseInterface
+    {
+        $user = $this->container->get('user');
+
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
+
+        if (in_array('consultar_squad', $permissions) === false) {
+            return $this->response->json([
+                'error' => 'Você não tem permissão para visualizar os membros dessa squad.'
+            ], 403);
+        }
+
+        $member = MemberModel::where(['squad_uuid' => $uuid, 'uuid' => $memberUuid])->first();
+
+        if (! $member) {
+            return $this->response->json(['error' => 'Member not found'], 404);
+        }
+
+        return $this->response->json($member);
     }
 }

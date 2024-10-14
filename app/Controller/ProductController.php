@@ -41,15 +41,13 @@ final class ProductController extends AbstractController
     public function create()
     {
         $user = $this->container->get('user');
-        
 
-        if(in_array('cadastrar_produto', unserialize($user->permissions)) === false ) {
-        
+
+        if (in_array('cadastrar_produto', $user->permissions) === false) {
             return $this->response->json([
-                    'error' => 'Você não tem permissão para criar este produto.'
-                ],403                
-            );
-        } 
+                'error' => 'Você não tem permissão para criar este produto.'
+            ], 403);
+        }
 
         $name = $this->request->input('name');
         $description = $this->request->input('description');
@@ -73,13 +71,17 @@ final class ProductController extends AbstractController
         $user = $this->container->get('user');
         $product = ProductModel::where('uuid', $uuid)->first();
 
-        if(in_array('consultar_produto', unserialize($user->permissions)) === false ) {
-        
-            return $this->response->json([
-                    'error' => 'Você não tem permissão para visualisar esse produto.'
-                ],403                
+        // Verifique se $user->permissions é uma string antes de usar unserialize()
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
+
+        if (in_array('consultar_produto', $permissions) === false) {
+            return $this->response->json(
+                [
+                    'error' => 'Você não tem permissão para visualizar esse produto.'
+                ],
+                403
             );
-        }        
+        }
 
         if (! $product) {
             return $this->response->json(['error' => 'Product not found'], 404);
@@ -152,11 +154,12 @@ final class ProductController extends AbstractController
     public function active($uuid): Psr7ResponseInterface
     {
         $user = $this->container->get('user');
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
-        if (in_array('admin', $user->permission) === false) {
+        if (in_array('admin', $permissions) === false) {
             return $this->response->json(
                 [
-                    'error' => 'Você não tem permissão para autalizar este produto.',
+                    'error' => 'Você não tem permissão para ativar este produto.',
                 ],
                 403
             );

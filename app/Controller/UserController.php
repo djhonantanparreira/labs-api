@@ -95,14 +95,16 @@ final class UserController extends AbstractController
             ], 403);
         }
 
-        $email = $this->request->input('email');
-        $name = $this->request->input('name');
-        $cidade = $this->request->input('cidade');
-        $estado = $this->request->input('estado');
-        $linkedin = $this->request->input('linkedin');
-        $discord = $this->request->input('discord');
-        $password = $this->request->input('password');
+        // Validação antes de atualizar
+        $email = $request->input('email', $user->email);
+        $name = $request->input('name', $user->name);
+        $cidade = $request->input('cidade', $user->cidade);
+        $estado = $request->input('estado', $user->estado);
+        $linkedin = $request->input('linkedin', $user->linkedin);
+        $discord = $request->input('discord', $user->discord);
+        $password = $request->input('password');
 
+        // Atualizando valores
         $user->name = $name;
         $user->email = $email;
         $user->linkedin = $linkedin;
@@ -110,6 +112,7 @@ final class UserController extends AbstractController
         $user->estado = $estado;
         $user->discord = $discord;
 
+        // Atualiza a senha apenas se o campo password for enviado
         if ($password) {
             $user->password = password_hash($password, PASSWORD_BCRYPT);
         }
@@ -205,45 +208,49 @@ final class UserController extends AbstractController
             ], 404);
         }
 
-        if (in_array('admin', unserialize($user->permission)) === false) {
-            return $this->response->json(
-                [
-                    'error' => 'Você não tem permissão para atualizar este produto.',
-                ],
-                403
-            );
+        // Se as permissões estiverem serializadas corretamente
+        $permissions = @unserialize($user->permissions);
+
+        if ($permissions === false || !is_array($permissions)) {
+            return $this->response->json([
+                'error' => 'Permissões inválidas.',
+            ], 400);
         }
 
-        $permission = $this->request->input('permission');
+        if (!in_array('admin', $permissions)) {
+            return $this->response->json([
+                'error' => 'Você não tem permissão para atualizar este usuário.',
+            ], 403);
+        }
 
-        $user->permission = serialize($permission);
-
+        $newPermissions = $request->input('permission');
+        $user->permissions = serialize($newPermissions);
         $user->save();
 
         return $this->response->json([
-            'message' => 'Usuário atualizado com sucesso!',
+            'message' => 'Permissões atualizadas com sucesso!',
             'user' => $user,
         ], 200);
     }
 
-    public function alterUserPermission(RequestInterface $request, $uuid){
 
+    public function alterUserPermission(RequestInterface $request, $uuid)
+    {
         $user = User::query()->where('uuid', $uuid)->first();
 
-        if(empty($user)) {
+        if (empty($user)) {
             return $this->response->json([
                 'error' => 'Usuário não encontrado.',
-                ], 404);
+            ], 404);
         }
 
         $user->permission = serialize($request->input('permissions'));
-        $user->save;
+        $user->save();  // Adicionando os parênteses aqui
 
         return $this->response->json([
-            'message' => 'Permissoes de usuário atualizadas com sucesso!',
+            'message' => 'Permissões de usuário atualizadas com sucesso!',
             'user' => $user,
             'status' => 200
-        ],200);
-
+        ], 200);
     }
 }

@@ -36,17 +36,15 @@ class SquadController extends AbstractController
     {
         $user = $this->container->get('user');
 
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
-        if(in_array('consultar_squad', unserialize($user->permissions)) === false ) {
-
+        if (in_array('consultar_squad', $permissions) === false) {
             return $this->response->json([
                 'error' => 'Você não tem permissão para visualizar essa squad.'
-                ],403
-            );
+            ], 403);
         }
 
         $squad = Squad::where('uuid', $uuid)->first();
-        
 
         if (! $squad) {
             return $this->response->json(['error' => 'Squad not found'], 404);
@@ -60,13 +58,14 @@ class SquadController extends AbstractController
         $user = $this->container->get('user');
 
 
-        if(in_array('cadastrar_squad', unserialize($user->permmissions)) === false ) {
+        $permissions = is_string($user->permissions) ? unserialize($user->permissions) : $user->permissions;
 
+        if (in_array('cadastrar_squad', $permissions) === false) {
             return $this->response->json([
-                    'error' => 'Você não tem permissão para criar essa squad.'
-                ],403
-            );
+                'error' => 'Você não tem permissão para criar essa squad.'
+            ], 403);
         }
+
 
         $data = $this->request->getParsedBody();
         $squad = new Squad();
@@ -77,7 +76,7 @@ class SquadController extends AbstractController
         return $this->response->json([
             'message' => 'Squad created successfully!',
             'squad' => $squad,
-        ],200);
+        ], 200);
     }
 
     public function update($uuid): Psr7ResponseInterface
@@ -94,6 +93,8 @@ class SquadController extends AbstractController
             return $this->response->json(['error' => 'Product not found'], 404);
         }
 
+        $user = $this->container->get('user');
+
         if ($user->uuid !== $product->owner_uuid) {
             return $this->response->json(
                 [
@@ -102,6 +103,8 @@ class SquadController extends AbstractController
                 403
             );
         }
+
+        $squad = Squad::where('uuid', $uuid)->first();
 
         $data = $this->request->getParsedBody();
 
@@ -112,12 +115,12 @@ class SquadController extends AbstractController
         return $this->response->json([
             'message' => 'Squad updated successfully!',
             'squad' => $squad,
-        ],200);
+        ], 200);
     }
 
     public function delete($uuid)
     {
-        $user = $this->container->get('user');        
+        $user = $this->container->get('user');
 
         $squad = Squad::where('uuid', $uuid)->first();
 

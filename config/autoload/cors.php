@@ -5,58 +5,14 @@ declare(strict_types=1);
 use function Hyperf\Support\env;
 
 return [
-    /*
-     * The allowed_methods and allowed_headers options are case-insensitive.
-     *
-     * You don't need to provide both allowed_origins and allowed_origins_patterns.
-     * If one of the strings passed matches, it is considered a valid origin.
-     *
-     * If ['*'] is provided to allowed_methods, allowed_origins or allowed_headers
-     * all methods / origins / headers are allowed.
-     *
-     */
-
-    /*
-     * You can enable CORS for 1 or multiple paths.
-     * Example: ['api/*']
-     */
     'paths' => [
-        '*',
+        '*', // Habilita CORS para todas as rotas
     ],
-
-    /*
-     * Matches the request method. `['*']` allows all methods.
-     */
-    'allowed_methods' => ['*'],
-
-    /*
-     * Matches the request origin. `['*']` allows all origins. Wildcards can be used, eg `*.mydomain.com`
-     */
-    /* 'allowed_origins' => ['*'], */
-    'allowed_origins' => [env('ALLOWED_ORIGINS', 'Hyperf Skeleton')],
-
-    /*
-     * Patterns that can be used with `preg_match` to match the origin.
-     */
-    'allowed_origins_patterns' => [],
-
-    /*
-     * Sets the Access-Control-Allow-Headers response header. `['*']` allows all headers.
-     */
-    'allowed_headers' => ['*'],
-
-    /*
-     * Sets the Access-Control-Expose-Headers response header with these headers.
-     */
-    'exposed_headers' => [],
-
-    /*
-     * Sets the Access-Control-Max-Age response header when > 0.
-     */
-    'max_age' => 0,
-
-    /*
-     * Sets the Access-Control-Allow-Credentials header.
-     */
-    'supports_credentials' => false,
+    'allowed_methods' => ['*'], // Permite todos os métodos (GET, POST, PUT, etc.)
+    'allowed_origins' => [env('ALLOWED_ORIGINS', '*')], // Permite qualquer origem, ou defina 'http://localhost:5173'
+    'allowed_origins_patterns' => [], // Não precisamos de padrões de origem adicionais
+    'allowed_headers' => ['*'], // Permite todos os cabeçalhos
+    'exposed_headers' => [], // Cabeçalhos expostos
+    'max_age' => 0, // Sem cache para a resposta preflight
+    'supports_credentials' => true, // Isso precisa estar 'true' se estiver usando cookies ou autenticação
 ];

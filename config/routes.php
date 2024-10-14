@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 use App\Middleware\AuthMiddleware;
 use Hyperf\HttpServer\Router\Router;
 
@@ -56,5 +57,5 @@ Router::get('/favicon.ico', function () {
 Router::addGroup('/api', function () {
     Router::post('/login', 'App\Controller\AuthController@login');
     Router::addRoute(['POST'], '/user', 'App\Controller\UserController@create');
-    Router::addRoute(['GET'], '/products/[{userUuid}]', 'App\Controller\Product@index');
+    Router::addRoute(['GET'], '/products/[{userUuid}]', 'App\Controller\ProductController@index');
 });

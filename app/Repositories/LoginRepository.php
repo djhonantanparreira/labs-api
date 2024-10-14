@@ -29,7 +29,7 @@ class LoginRepository implements LoginRepositoryInterface
 
     #[Value(key: 'defaultPermissions.founder_default_permissions')]
     protected $defaultFounderPermissions;
-    
+
 
     public function login($request)
     {
@@ -47,6 +47,10 @@ class LoginRepository implements LoginRepositoryInterface
                 'uuid' => $user->uuid,
                 'email' => $user->email,
                 'name' => $user->name,
+                'cidade' => $user->cidade,
+                'estado' => $user->estado,
+                'discord' => $user->discord,
+                'linkedin' => $user->linkedin,
                 'user_type' => $user->user_type,
                 'iat' => time(),
             ];
