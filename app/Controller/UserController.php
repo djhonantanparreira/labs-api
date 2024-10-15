@@ -253,4 +253,16 @@ final class UserController extends AbstractController
             'status' => 200
         ], 200);
     }
+    public function show($uuid)
+    {
+        $user = User::query()->where('uuid', $uuid)->first();
+
+        if (empty($user)) {
+            return $this->response->json([
+                'error' => 'Usuário não encontrado.',
+            ], 404);
+        }
+
+        return $this->response->json($user);
+    }
 }
