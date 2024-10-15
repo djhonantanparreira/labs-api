@@ -253,8 +253,17 @@ final class UserController extends AbstractController
             'status' => 200
         ], 200);
     }
+
     public function show($uuid)
     {
+        $authenticatedUser = $this->container->get('user');
+
+        if ($authenticatedUser->uuid !== $uuid) {
+            return $this->response->json([
+                'error' => 'Você não tem permissão para visualizar este usuário.',
+            ], 403);
+        }
+
         $user = User::query()->where('uuid', $uuid)->first();
 
         if (empty($user)) {
